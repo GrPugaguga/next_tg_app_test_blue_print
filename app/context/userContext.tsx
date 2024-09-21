@@ -5,18 +5,20 @@ import debounce from 'lodash.debounce';
 import { useJWT } from "../../hooks/useJWT";
 import { getAvatarPath } from "../../hooks/getAvatarPath";
 import useLocalStorage from "../../hooks/useLocalStorage";
-import { User } from '@/types';
+import { User, Upgrade } from '@/types';
+import getAvailableUpgrades from '../../hooks/getAvailableUpgrades';
 const UserContext = createContext<any>(undefined);
 
 export function UserContextProvider({ children }: { children: React.ReactNode }) {
     const [userData, setUserData] = useState<User | null>(null);
+    const [upgrades, setUpgrades] = useState<Upgrade[]>([]);
     const [token, setToken] = useState<string | null>(null);
     const [energy, setEnergy] = useState<number>(0);
     const [energyStorage, setEnergyStorage] = useLocalStorage('energy', '');
     const [clicksStorage, setClicksStorage] = useLocalStorage('clicks', '');
     const [timestamp, setTimestamp] = useLocalStorage('last_update_timestamp', Date.now());
     const isFirstRender = useRef(true);
-
+    
 
     const updateClicksOnServer = useCallback(debounce(async (clicks: number, energy: number, timestamp: number) => {
         if (!token) return;
@@ -65,7 +67,6 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
                 // get user data from database
                 authUser(WebApp.initDataUnsafe.user.id.toString(), WebApp.initDataUnsafe.user.username).then(user => {
                     // update local user info and                     
-                    if(user.last_sync_timestamp < timestamp) {    
                     setUserData(
                         {...user, 
                             points: user.points + Math.floor((Date.now() - Number(user.last_sync_timestamp))/1000)*user.points_per_second + Number(clicksStorage)*user.points_per_click,
@@ -80,10 +81,10 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
                         energy: Math.min(Number(energyStorage) + Math.floor((Date.now() - Number(timestamp))/1000)*user.energy_per_second, user.max_energy), 
                         points: user.points + Math.floor((Date.now() - Number(user.last_sync_timestamp))/1000)*user.points_per_second + Number(clicksStorage)*user.points_per_click
                     }),
+                    }).then(response => response.json()).then(data => {
+                        setUpgrades(getAvailableUpgrades(user, data.upgrades))
                     })
-                } else {
-                    setUserData({...user})
-                }
+
 
                     setClicksStorage('0')
                     setEnergy(Math.min(Number(energyStorage) + Math.floor((Date.now() - Number(timestamp))/1000)*user.energy_per_second, user.max_energy))
@@ -136,7 +137,7 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
 
 
     return (
-        <UserContext.Provider value={{ userData, setUserData, token, setToken,energy, setEnergy,handleClick}}>
+        <UserContext.Provider value={{ userData, setUserData, token, setToken,energy, setEnergy,handleClick, upgrades,setUpgrades}}>
             {children}
         </UserContext.Provider>
     );

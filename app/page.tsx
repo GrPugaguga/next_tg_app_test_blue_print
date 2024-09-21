@@ -1,7 +1,7 @@
 "use client"
 
 import { useUser } from "./context/userContext";
-import { useFetch } from "../hooks/useFetch";
+// import { useFetch } from "../hooks/useFetch";
 import UserInfo from "./components/UserInfo";
 import TouchPlace from './components/TouchPlace';
 import InfoPlace from './components/InfoPlace'; // Added import for InfoPlace component
@@ -19,7 +19,7 @@ export default function UserDataComponent() {
   //     console.log(data);
   // }
 
-  if (!userData) {
+  if (!userData ) {
     return <div className="flex justify-center items-center h-screen bg-gray-800 text-black">Загрузка ...</div>;
   }
 
@@ -28,13 +28,13 @@ export default function UserDataComponent() {
       <div className="p-4">
         <div className="flex items-center space-x-4 mb-4">
           <UserInfo />
-          <InfoPlace gold={userData.points} energy={energy} maxEnergy={userData.max_energy}/> {/* Предполагаем, что у вас есть состояние для энергии */}
+          <InfoPlace gold={userData.points} energy={energy} maxEnergy={userData.max_energy} /> {/* Предполагаем, что у вас есть состояние для энергии */}
         </div>
       </div>
       <div className="flex-grow flex justify-center items-center mb-[100px]">
         <TouchPlace />
       </div>
-      <MarketPlace />
+      <MarketPlace/>
     </div>
   );
 }

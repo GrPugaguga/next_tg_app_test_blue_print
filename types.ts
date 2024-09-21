@@ -17,3 +17,11 @@ export interface User {
     // daily_streak: number;
     // boost: {}[]
 }
+export interface Upgrade {
+    cost: number;
+    upgrade_price: number;
+    lvl: number;
+    points_per_second: number;
+    points_per_click: number;
+    max_energy: number;
+}
