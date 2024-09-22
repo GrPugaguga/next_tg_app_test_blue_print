@@ -8,7 +8,7 @@ import InfoPlace from './components/InfoPlace'; // Added import for InfoPlace co
 import MarketPlace from './components/MarketPlace';
 
 export default function UserDataComponent() {
-  const { userData, energy } = useUser(); 
+  const { userData } = useUser(); 
 
   // const fetchData = useFetch();
 
@@ -28,13 +28,14 @@ export default function UserDataComponent() {
       <div className="p-4">
         <div className="flex items-center space-x-4 mb-4">
           <UserInfo />
-          <InfoPlace gold={userData.points} energy={energy} maxEnergy={userData.max_energy} /> {/* Предполагаем, что у вас есть состояние для энергии */}
+          <InfoPlace gold={userData.points} energy={userData.energy} maxEnergy={userData.max_energy} /> {/* Предполагаем, что у вас есть состояние для энергии */}
         </div>
       </div>
       <div className="flex-grow flex justify-center items-center mb-[100px]">
         <TouchPlace />
       </div>
-      <MarketPlace/>
+      {/* <button onClick={sendToken} className="bg-red-500 text-white p-2 rounded-md w-[200px] h-[50px] z-[99999]">Send Token</button> */}
+      <MarketPlace />
     </div>
   );
 }

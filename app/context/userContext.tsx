@@ -5,15 +5,14 @@ import debounce from 'lodash.debounce';
 import { useJWT } from "../../hooks/useJWT";
 import { getAvatarPath } from "../../hooks/getAvatarPath";
 import useLocalStorage from "../../hooks/useLocalStorage";
-import { User, Upgrade } from '@/types';
+import { User } from '@/types';
 import getAvailableUpgrades from '../../hooks/getAvailableUpgrades';
 const UserContext = createContext<any>(undefined);
 
 export function UserContextProvider({ children }: { children: React.ReactNode }) {
     const [userData, setUserData] = useState<User | null>(null);
-    const [upgrades, setUpgrades] = useState<Upgrade[]>([]);
+    const [upgrades, setUpgrades] = useState<any>([]);
     const [token, setToken] = useState<string | null>(null);
-    const [energy, setEnergy] = useState<number>(0);
     const [energyStorage, setEnergyStorage] = useLocalStorage('energy', '');
     const [clicksStorage, setClicksStorage] = useLocalStorage('clicks', '');
     const [timestamp, setTimestamp] = useLocalStorage('last_update_timestamp', Date.now());
@@ -70,24 +69,23 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
                     setUserData(
                         {...user, 
                             points: user.points + Math.floor((Date.now() - Number(user.last_sync_timestamp))/1000)*user.points_per_second + Number(clicksStorage)*user.points_per_click,
-                            energy: Math.min(Number(energyStorage) + Math.floor((Date.now() - Number(timestamp))/1000)*user.energy_per_second, user.max_energy)
+                            energy: Math.min(user.energy + Math.floor((Date.now() - user.last_sync_timestamp)/1000)*user.energy_per_second, user.max_energy)
                         })
+                    setEnergyStorage( (Math.min(user.energy + Math.floor((Date.now() - user.last_sync_timestamp)/1000)*user.energy_per_second, user.max_energy).toString()))
                     // sync with database
                     fetch('/api/sync', {
                         method: 'POST',
                     body: JSON.stringify({
                         ...user,
                         last_sync_timestamp: Date.now(),
-                        energy: Math.min(Number(energyStorage) + Math.floor((Date.now() - Number(timestamp))/1000)*user.energy_per_second, user.max_energy), 
+                        energy: Math.min(user.energy + Math.floor((Date.now() - user.last_sync_timestamp)/1000)*user.energy_per_second, user.max_energy),
                         points: user.points + Math.floor((Date.now() - Number(user.last_sync_timestamp))/1000)*user.points_per_second + Number(clicksStorage)*user.points_per_click
                     }),
                     }).then(response => response.json()).then(data => {
                         setUpgrades(getAvailableUpgrades(user, data.upgrades))
                     })
 
-
                     setClicksStorage('0')
-                    setEnergy(Math.min(Number(energyStorage) + Math.floor((Date.now() - Number(timestamp))/1000)*user.energy_per_second, user.max_energy))
                     // set token for fetching 
                     useJWT(WebApp.initDataUnsafe.user.id.toString()).then(setToken);   
                     // if avatar changed, update it
@@ -102,8 +100,7 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
                     });
                     // set interval for update energy and points per second
                     const interval = setInterval(() => {
-                        setEnergy(prev => Math.min(prev + (user.energy_per_second || 0), user.max_energy))
-                        setUserData(prev => prev ? {...prev, points: prev.points + (prev.points_per_second || 0)} : null)
+                        setUserData(prev => prev ? {...prev, points: prev.points + (prev.points_per_second || 0), energy: Math.min(prev.energy + (prev.energy_per_second || 0), prev.max_energy)} : null)
                     }, 1000)  
 
         
@@ -117,27 +114,25 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
 
     // handle click function for register clicks 
     const handleClick = () => {
-        if(userData && energy > 0) {
-            setEnergy((prev) => Math.max(prev - 1, 0))
-            setUserData({...userData, points: userData.points + userData.points_per_click})
-            setClicksStorage(String(Number(clicksStorage) + 1) )
+        if(userData && userData.energy > 0) {
+            if(userData.booster_expirated_time && userData.booster_expirated_time > Date.now()){
+                setUserData({...userData, points: userData.points + userData.points_per_click*2, energy: Math.max(userData.energy - 1, 0)})
+                setClicksStorage(String(Number(clicksStorage) + 2) )
+            } else {
+                setUserData({...userData, points: userData.points + userData.points_per_click, energy: Math.max(userData.energy - 1, 0)})
+                setClicksStorage(String(Number(clicksStorage) + 1) )
+            }
             setTimestamp(Date.now())
+            setEnergyStorage(userData.energy.toString())
             // update clicks on server
             updateClicksOnServer(Number(clicksStorage), Number(energyStorage), Number(timestamp))
         }
     }
 
 
-// useEffectupdate energy on localstorage, may be not need.
-    useEffect(() => {
-        if(userData) {
-            setEnergyStorage(energy.toString())
-        }
-    }, [energy]);
-
 
     return (
-        <UserContext.Provider value={{ userData, setUserData, token, setToken,energy, setEnergy,handleClick, upgrades,setUpgrades}}>
+        <UserContext.Provider value={{ userData, setUserData, token, setToken,handleClick, upgrades,setUpgrades, energyStorage}}>
             {children}
         </UserContext.Provider>
     );

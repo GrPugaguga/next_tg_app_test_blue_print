@@ -14,8 +14,12 @@ export interface User {
     referalsIds: number[];
     upgrades: {id:string, level:number}[];
     connected_address: string | null;
-    // daily_streak: number;
-    // boost: {}[]
+    daily_streak: {
+        count:number,
+        last_claim_time:Date | number
+    };
+    boosters:{multitouch:{count:number}, recharge:{count:number}}
+    booster_expirated_time?:number
 }
 export interface Upgrade {
     cost: number;

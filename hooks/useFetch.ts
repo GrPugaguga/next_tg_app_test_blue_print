@@ -22,7 +22,8 @@ const useFetch = () => {
         });
 
         if (!res.ok) {
-            throw new Error('Ошибка сети');
+            console.log(res.status)
+            return false
         }
 
         return await res.json();

@@ -10,11 +10,11 @@ function getAvailableUpgrades(user: any, upgrades: any) {
                 console.log(upgrade)
                 availableUpgrades.push({
                     id: upgrade.id,
-                    level:upgrade.levels[u.level.lvl+1]
+                    level:upgrade.levels[u.level.lvl]
                 })
                 console.log({
                     id: upgrade.id,
-                    level:upgrade.levels[u.level.lvl+1]
+                    level:upgrade.levels[u.level.lvl]
                 })
                 isFind = true
             }
@@ -31,8 +31,6 @@ function getAvailableUpgrades(user: any, upgrades: any) {
         }
 
     }
-    console.log(availableUpgrades)
-
     return availableUpgrades
 }
 

@@ -13,7 +13,7 @@ const InfoPlace: React.FC<InfoPlaceProps> = ({ gold, energy, maxEnergy }) => {
       <div className="flex-grow bg-gray-600 h-6 rounded-full overflow-hidden relative">
         <div 
           className="bg-blue-500 h-full transition-all duration-300 ease-in-out"
-          style={{ width: `${energy}%` }}
+          style={{ width: `${(energy / maxEnergy) * 100}%` }}
         ></div>
       </div>
       <div className="text-white whitespace-nowrap">{energy}/{maxEnergy}</div>

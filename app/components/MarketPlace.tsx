@@ -13,8 +13,10 @@ import getAvailableUpgrades from '@/hooks/getAvailableUpgrades';
         user: userData,
         upgrade: upgrade
       });
+      if(data){
       setUpgrades(getAvailableUpgrades(data.user,data.upgrades))
       setUserData((prev: any) => ({...data.user, points: prev.points - upgrade.level.price}))
+      }
   }
 
   return (

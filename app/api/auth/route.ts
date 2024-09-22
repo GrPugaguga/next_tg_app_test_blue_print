@@ -29,7 +29,12 @@ try {
                 referal_link: id,
                 referalsIds: [],
                 upgrades: [],
-                connected_address:null
+                connected_address:null,
+                daily_streak:{count:0,last_claim_time:0},
+                boosters:{
+                    multitouch:{count:2},
+                    recharge:{count:2},
+                },
             }
             const response = await createUser(newUser);
             if (response) {
