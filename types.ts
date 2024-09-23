@@ -1,6 +1,7 @@
 export interface User {
     id: number;
     username: string;
+    total_points: number;
     avatar: string;
     points: number;
     energy: number;
@@ -21,6 +22,9 @@ export interface User {
     boosters:{multitouch:{count:number}, recharge:{count:number}}
     booster_expirated_time?:number
 }
+
+
+
 export interface Upgrade {
     cost: number;
     upgrade_price: number;

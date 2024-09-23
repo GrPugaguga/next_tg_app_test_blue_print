@@ -7,6 +7,7 @@ export default async function setUserClick(id: string | number, points_increment
     await updateDoc(userRef, {
       energy: energy,
       points: increment(points_increment),
+      total_points: increment(points_increment),
       last_sync_timestamp: timestamp
     });
     return true;

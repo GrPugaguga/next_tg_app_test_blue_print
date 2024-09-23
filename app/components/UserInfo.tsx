@@ -3,11 +3,29 @@ import { useState } from 'react';
 import { useUser } from "../context/userContext";
 import Image from "next/image";
 import {useFetch} from "../../hooks/useFetch";
+import { initUtils } from '@telegram-apps/sdk'
+
 
 export default function UserInfo() {
   const { userData,setUserData } = useUser();
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const fetchData = useFetch();
+  const INVITE_URL = "https://t.me/spartatestapp_bot/app"
+
+
+  const handleInviteFriend = () => {
+    const utils = initUtils()
+    const inviteLink = `${INVITE_URL}?startapp=${userData.referal_link}`
+    const shareText = `Join me on this awesome Telegram mini app!`
+    const fullUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(shareText)}`
+    utils.openTelegramLink(fullUrl)
+  }
+
+  const handleCopyLink = () => {
+    const inviteLink = `${INVITE_URL}?startapp=${userData.id}`
+    navigator.clipboard.writeText(inviteLink)
+    alert('Invite link copied to clipboard!')
+  }
 
 
   const useBoost = async (id:string) => {
@@ -87,6 +105,22 @@ export default function UserInfo() {
                     </div>
                   </div>
                 </div>
+              </li>
+              <li>
+              <div className="flex flex-col space-y-4">
+        <button
+          onClick={handleInviteFriend}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Invite Friend
+        </button>
+        <button
+          onClick={handleCopyLink}
+          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Copy Invite Link
+        </button>
+        </div>
               </li>
           </ul>
         </div>

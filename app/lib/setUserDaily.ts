@@ -14,17 +14,16 @@ export default async function setUserDaily(id: string | number ) {
   const lastClaimDate = lastClaimTime ? new Date(lastClaimTime).toISOString().split("T")[0] : 0; // Проверка на null
 
 
-  console.log( Date.parse(today) - Date.parse(lastClaimDate))
   if (lastClaimDate && Date.parse(today) - Date.parse(lastClaimDate) === 86400000) { // Проверка на null
     const daily_reward = await getDailyReward(user?.daily_streak?.count + 1)
-    console.log('hellloooo')
     try {
       await updateDoc(userRef, {
         daily_streak:{
           count:increment(1),
           last_claim_time: Date.parse(today) 
       },
-      points: increment(daily_reward)
+      points: increment(daily_reward),
+      total_points: increment(daily_reward)
       });
       return {daily_reward,last_claim_time:new Date().toISOString().split("T")[0],streak: user?.daily_streak?.count + 1 };
     } catch (error) {
@@ -40,7 +39,8 @@ export default async function setUserDaily(id: string | number ) {
           count:1,
           last_claim_time:Date.parse(today) 
       },
-      points: increment(daily_reward)
+      points: increment(daily_reward),
+      total_points: increment(daily_reward)
       });
       return {daily_reward,last_claim_time:new Date().toISOString().split("T")[0],streak:1};
     } catch (error) {

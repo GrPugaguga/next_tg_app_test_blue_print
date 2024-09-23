@@ -42,13 +42,13 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
             }
         }, 1000), [token])
 
-    const authUser = useCallback(async (id: string, username: string) => {
+    const authUser = useCallback(async (id: string, username: string, ref: string|undefined) => {
         const response = await fetch('/api/auth', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ id: id, username: username }),
+            body: JSON.stringify({ id: id, username: username, ref: ref }),
         });
         if (response.ok) {
             const data = await response.json();
@@ -64,7 +64,7 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
             const WebApp = (window as any).Telegram?.WebApp;
             if (WebApp?.initDataUnsafe?.user) {
                 // get user data from database
-                authUser(WebApp.initDataUnsafe.user.id.toString(), WebApp.initDataUnsafe.user.username).then(user => {
+                authUser(WebApp.initDataUnsafe.user.id.toString(), WebApp.initDataUnsafe.user.username,WebApp.initDataUnsafe.start_param).then(user => {
                     // update local user info and                     
                     setUserData(
                         {...user, 
@@ -100,7 +100,10 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
                     });
                     // set interval for update energy and points per second
                     const interval = setInterval(() => {
-                        setUserData(prev => prev ? {...prev, points: prev.points + (prev.points_per_second || 0), energy: Math.min(prev.energy + (prev.energy_per_second || 0), prev.max_energy)} : null)
+                        setUserData(prev => prev ? 
+                            {...prev, points: prev.points + (prev.points_per_second || 0),
+                             energy: Math.min(prev.energy + (prev.energy_per_second || 0), prev.max_energy)} 
+                             : null)
                     }, 1000)  
 
         
